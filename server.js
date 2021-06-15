@@ -5,7 +5,7 @@ const passport = require('passport');
 const session = require('express-session');
 const myDB = require('./connection');
 const fccTesting = require('./freeCodeCamp/fcctesting.js');
-const { ObjectID } = require('mongodb');
+const ObjectID = require('mongodb').ObjectID
 
 const app = express();
 
@@ -14,8 +14,6 @@ app.use('/public', express.static(process.cwd() + '/public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'pug')
-
-
 
 app.use(session({
   secret: process.env.SESSION_SECRET,
@@ -32,7 +30,7 @@ myDB(async client => {
   
   app.route('/').get((req, res) => { 
     res.render(process.cwd() + '/views/pug', {
-      title: 'Hello',
+      title: 'Connected to Database',
       message: 'Please login'
     });
   });
@@ -47,6 +45,7 @@ myDB(async client => {
     })
   })
 
+
 }).catch(e => {
   app.route('/').get((req, res) => {
     res.render('pug', { 
@@ -56,7 +55,7 @@ myDB(async client => {
   });
 })
 
-const PORT = process.env.PORT || 3333;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log('Listening on port ' + PORT);
 });
