@@ -15,9 +15,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'pug')
 
-app.route('/').get((req, res) => {
-  res.render(process.cwd() + '/views/pug', {title: 'Hello', message: 'Please login'});
-});
+
 
 app.use(session({
   secret: process.env.SESSION_SECRET,
@@ -29,17 +27,36 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 
-passport.serializeUser((user, done) => {
-  done(null, user._id)
+myDB(async client => {
+  const myDataBase = await client.db('database').collection('users')
+  
+  app.route('/').get((req, res) => { 
+    res.render(process.cwd() + '/views/pug', {
+      title: 'Hello',
+      message: 'Please login'
+    });
+  });
+
+  passport.serializeUser((user, done) => {
+    done(null, user._id)
+  })
+  
+  passport.deserializeUser((id, done) => {
+    myDataBase.findOne({ _id: new ObjectID(id) }, (err, doc) => {
+      done((null, doc))
+    })
+  })
+
+}).catch(e => {
+  app.route('/').get((req, res) => {
+    res.render('pug', { 
+      title: e, 
+      message: 'Unable to login' 
+    });
+  });
 })
 
-passport.deserializeUser((id, done) => {
-  // myDataBase.findOne({ _id: new ObjectID(id) }, (err, doc) => {
-    done((null, null))
-  // })
-})
-
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3030;
 app.listen(PORT, () => {
   console.log('Listening on port ' + PORT);
 });
